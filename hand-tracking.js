@@ -47,7 +47,7 @@ function drawPoints(hand, type) {
     ctx.fill();
   } else if (type === "zoom") {
     [4, 8].forEach(index => {
-      const point = hand[index];
+      const point = hand[index]; // polegar e indicador
       const x = point.x * canvas.width;
       const y = point.y * canvas.height;
       ctx.fillStyle = "blue";

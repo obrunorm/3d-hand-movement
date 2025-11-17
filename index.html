@@ -4,42 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hand Tracking + Three.js</title>
-
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-    }
-    #canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      border: 2px solid #444;
-    }
-    #fps {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: lime;
-      font-family: monospace;
-      background: rgba(0,0,0,0.4);
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
+    body { margin: 0; overflow: hidden; background: #000; }
+    #canvas { position: absolute; top: 0; left: 0; border: 2px solid #444; }
+    #fps { position: absolute; top: 10px; left: 10px; color: lime; font-family: monospace; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; }
   </style>
 </head>
 <body>
+  <div id="fps">FPS: 0</div>
+  <video id="video" autoplay playsinline style="display:none"></video>
+  <canvas id="canvas"></canvas>
 
-<div id="fps">FPS: 0</div>
-<video id="video" autoplay playsinline style="display:none"></video>
-<canvas id="canvas"></canvas>
-
-<!-- Hand tracking -->
-<script type="module" src="./hand-tracking.js"></script>
-
-<!-- Three.js (separado) -->
-<script type="module" src="./scene.js"></script>
-
+  <!-- Apenas o script principal -->
+  <script type="module" src="./hand-tracking.js"></script>
 </body>
 </html>
