@@ -51,8 +51,8 @@ window.addEventListener("resize", () => {
 // ======== FUNÇÃO PARA ATUALIZAR O CUBO ========
 export function updateCubeWithHand(hand) {
   // Rotação baseada na posição da mão
-  const x = hand[0].x;
-  const y = hand[0].y;
+  const x = hand[1].x;
+  const y = hand[1].y;
   cube.rotation.y = (x - 0.5) * Math.PI * 2;
   cube.rotation.x = (y - 0.5) * Math.PI;
 
