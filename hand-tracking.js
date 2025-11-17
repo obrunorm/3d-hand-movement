@@ -1,5 +1,5 @@
 import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
-import { updateCubeWithHand } from "./scene.js";
+import { updateCubeRotation, updateCubeZoom } from "./scene.js";
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
@@ -35,21 +35,32 @@ async function loadModel() {
   });
 }
 
-// ======== DESENHO ========
-function drawPoints(points) {
-  const tipIndices = [4, 8];
-  for (const index of tipIndices) {
-    const point = points[index];
+// ======== DRAW POINTS ========
+function drawPoints(hand, type) {
+  if (type === "movement") {
+    // desenha apenas indicador (tip 8)
+    const point = hand[8];
     const x = point.x * canvas.width;
     const y = point.y * canvas.height;
     ctx.fillStyle = "red";
     ctx.beginPath();
     ctx.arc(x, y, 10, 0, Math.PI * 2);
     ctx.fill();
+  } else if (type === "zoom") {
+    // desenha polegar (4) e indicador (8)
+    [4, 8].forEach(index => {
+      const point = hand[index];
+      const x = point.x * canvas.width;
+      const y = point.y * canvas.height;
+      ctx.fillStyle = "blue";
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 }
 
-// ======== LOOP DE DETECÇÃO ========
+// ======== DETECTION LOOP ========
 async function detect() {
   const now = performance.now();
   const delta = now - lastFrameTime;
@@ -60,9 +71,19 @@ async function detect() {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   if (results && results.landmarks && results.landmarks.length > 0) {
-    const hand = results.landmarks[0]; // primeira mão
-    drawPoints(hand);
-    updateCubeWithHand(hand); // chama função do scene.js
+    for (let i = 0; i < results.landmarks.length; i++) {
+      const hand = results.landmarks[i];
+      const handedness = results.handedness[i].label; // "Left" ou "Right"
+
+      // Escolha qual mão é movimento e qual é zoom
+      if (handedness === "Left") {
+        drawPoints(hand, "movement");
+        updateCubeRotation(hand);
+      } else if (handedness === "Right") {
+        drawPoints(hand, "zoom");
+        updateCubeZoom(hand);
+      }
+    }
   }
 
   requestAnimationFrame(detect);
@@ -70,5 +91,3 @@ async function detect() {
 
 // ======== START SYSTEM ========
 await startCamera();
-await loadModel();
-detect();
