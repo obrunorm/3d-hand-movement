@@ -44,18 +44,18 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const fpsBox = document.getElementById("fps");
 
-let lastFrameTime = performance.now();
+let lastFrame = performance.now();
 let handLandmarker;
 
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
 
-  return new Promise(res => {
+  return new Promise(resolve => {
     video.onloadedmetadata = () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      res();
+      resolve();
     };
   });
 }
@@ -73,11 +73,11 @@ async function loadModel() {
 
 function drawConnections(points) {
   const fingers = [
-    [0,1,2,3,4],      // polegar
-    [0,5,6,7,8],      // indicador
-    [0,9,10,11,12],   // médio
-    [0,13,14,15,16],  // anelar
-    [0,17,18,19,20]   // mínimo
+    [0,1,2,3,4],
+    [0,5,6,7,8],
+    [0,9,10,11,12],
+    [0,13,14,15,16],
+    [0,17,18,19,20]
   ];
 
   ctx.strokeStyle = "lime";
@@ -85,42 +85,41 @@ function drawConnections(points) {
 
   for (const finger of fingers) {
     ctx.beginPath();
-    const first = points[finger[0]];
-    ctx.moveTo(first.x * canvas.width, first.y * canvas.height);
-
+    ctx.moveTo(points[finger[0]].x * canvas.width,
+               points[finger[0]].y * canvas.height);
     for (let i = 1; i < finger.length; i++) {
-      const p = points[finger[i]];
-      ctx.lineTo(p.x * canvas.width, p.y * canvas.height);
+      ctx.lineTo(points[finger[i]].x * canvas.width,
+                 points[finger[i]].y * canvas.height);
     }
     ctx.stroke();
   }
 }
 
 function drawPoints(points) {
-  for (const point of points) {
-    const x = point.x * canvas.width;
-    const y = point.y * canvas.height;
-    ctx.fillStyle = "lime";
+  ctx.fillStyle = "lime";
+  for (const p of points) {
     ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.arc(p.x * canvas.width, p.y * canvas.height, 5, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-async function detect() {
+function detect() {
   const now = performance.now();
-  const delta = now - lastFrameTime;
-  lastFrameTime = now;
+  fpsBox.textContent = `FPS: ${(1000 / (now - lastFrame)).toFixed(1)}`;
+  lastFrame = now;
 
-  // Atualiza FPS
-  fpsBox.textContent = `FPS: ${(1000 / delta).toFixed(1)}`;
+  // espelha horizontalmente
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+  ctx.restore();
 
-  const result = await handLandmarker.detect(video);
+  const result = handLandmarker.detectForVideo(video, now);
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  if (result.landmarks) {
+  if (result.landmarks && result.landmarks.length > 0) {
     const hand = result.landmarks[0];
+
     drawPoints(hand);
     drawConnections(hand);
   }
