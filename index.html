@@ -37,56 +37,54 @@
 <canvas id="canvas"></canvas>
 
 <script type="module">
-
-import {
-  FilesetResolver,
-  HandLandmarker
-} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
+import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const fpsBox = document.getElementById("fps");
 
-let lastFrame = performance.now();
+let lastFrameTime = performance.now();
 let handLandmarker;
 
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
 
-  return new Promise(resolve => {
+  return new Promise((res) => {
     video.onloadedmetadata = () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      resolve();
+      res();
     };
   });
 }
 
 async function loadModel() {
-
-  const vision = await FilesetResolver.forVisionTasks(
+  const visionApp = await vision.FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
   );
 
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath:
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/models/hand_landmarker.task"
-    },
-    runningMode: "VIDEO",
-    numHands: 1
-  });
+  handLandmarker = await vision.HandLandmarker.createFromOptions(
+    visionApp,
+    {
+      baseOptions: {
+        // MODELO LOCAL — FUNCIONA NA VERCEL
+        modelAssetPath: "/models/hand_landmarker.task"
+      },
+      runningMode: "VIDEO",
+      numHands: 1
+    }
+  );
 }
 
 function drawConnections(points) {
   const fingers = [
-    [0,1,2,3,4],
-    [0,5,6,7,8],
-    [0,9,10,11,12],
-    [0,13,14,15,16],
-    [0,17,18,19,20]
+    [0, 1, 2, 3, 4],
+    [0, 5, 6, 7, 8],
+    [0, 9, 10, 11, 12],
+    [0, 13, 14, 15, 16],
+    [0, 17, 18, 19, 20],
   ];
 
   ctx.strokeStyle = "lime";
@@ -94,48 +92,52 @@ function drawConnections(points) {
 
   for (const finger of fingers) {
     ctx.beginPath();
-    ctx.moveTo(points[finger[0]].x * canvas.width, points[finger[0]].y * canvas.height);
+    const first = points[finger[0]];
+    ctx.moveTo(first.x * canvas.width, first.y * canvas.height);
+
     for (let i = 1; i < finger.length; i++) {
-      ctx.lineTo(points[finger[i]].x * canvas.width, points[finger[i]].y * canvas.height);
+      const p = points[finger[i]];
+      ctx.lineTo(p.x * canvas.width, p.y * canvas.height);
     }
     ctx.stroke();
   }
 }
 
 function drawPoints(points) {
-  ctx.fillStyle = "lime";
-  for (const p of points) {
+  for (const point of points) {
+    const x = point.x * canvas.width;
+    const y = point.y * canvas.height;
+    ctx.fillStyle = "lime";
     ctx.beginPath();
-    ctx.arc(p.x * canvas.width, p.y * canvas.height, 5, 0, Math.PI * 2);
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-function detect() {
+async function detect() {
   const now = performance.now();
-  fpsBox.textContent = `FPS: ${(1000 / (now - lastFrame)).toFixed(1)}`;
-  lastFrame = now;
+  const delta = now - lastFrameTime;
+  lastFrameTime = now;
 
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-  ctx.restore();
+  fpsBox.textContent = `FPS: ${(1000 / delta).toFixed(1)}`;
 
-  const timestamp = performance.now();
-  const result = handLandmarker.detectForVideo(video, timestamp);
+  const results = handLandmarker.detectForVideo(video, now);
 
-  if (result.landmarks && result.landmarks.length > 0) {
-    drawPoints(result.landmarks[0]);
-    drawConnections(result.landmarks[0]);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  if (results && results.landmarks && results.landmarks.length > 0) {
+    const hand = results.landmarks[0];
+    drawPoints(hand);
+    drawConnections(hand);
   }
 
   requestAnimationFrame(detect);
 }
 
+// Start
 await startCamera();
 await loadModel();
 detect();
-
 </script>
 
 </body>
