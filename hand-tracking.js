@@ -74,23 +74,29 @@ async function detect() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  if (results.handLandmarks.length > 0) {
-    for (let i = 0; i < results.handLandmarks.length; i++) {
-      const hand = results.handLandmarks[i];
+if (
+  results &&
+  Array.isArray(results.handLandmarks) &&
+  results.handLandmarks.length > 0 &&
+  Array.isArray(results.handedness) &&
+  results.handedness.length > 0
+) {
+  for (let i = 0; i < results.handLandmarks.length; i++) {
+    const hand = results.handLandmarks[i];
 
-      // 🔥 Forma correta na versão atual do Mediapipe
-      const handedness = results.handedness[i][0].categoryName; // "Left" ou "Right"
+    // Forma correta para pegar Left/Right
+    const handedness = results.handedness[i][0].categoryName;
 
-      if (handedness === "Left") {
-        drawPoints(hand, "rotation");
-        updateCubeRotation(hand);
-      } 
-      else if (handedness === "Right") {
-        drawPoints(hand, "zoom");
-        updateCubeZoom(hand);
-      }
+    if (handedness === "Left") {
+      drawPoints(hand, "rotation");
+      updateCubeRotation(hand);
+    } 
+    else if (handedness === "Right") {
+      drawPoints(hand, "zoom");
+      updateCubeZoom(hand);
     }
   }
+}
 
   requestAnimationFrame(detect);
 }
