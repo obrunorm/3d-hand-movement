@@ -13,12 +13,13 @@ let handLandmarker;
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
-  return new Promise(res => {
-    video.onloadedmetadata = () => {
+
+  return new Promise((resolve) => {
+    video.addEventListener("loadeddata", () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      res();
-    };
+      resolve();
+    });
   });
 }
 
@@ -37,22 +38,21 @@ async function loadModel() {
 
 // ======== DRAW POINTS ========
 function drawPoints(hand, type) {
+  if (!hand) return;
+
   if (type === "rotation") {
-    const point = hand[8]; // indicador
-    const x = point.x * canvas.width;
-    const y = point.y * canvas.height;
+    const p = hand[8]; // indicador
     ctx.fillStyle = "red";
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.arc(p.x * canvas.width, p.y * canvas.height, 12, 0, Math.PI * 2);
     ctx.fill();
+
   } else if (type === "zoom") {
-    [4, 8].forEach(index => {
-      const point = hand[index]; // polegar e indicador
-      const x = point.x * canvas.width;
-      const y = point.y * canvas.height;
+    [4, 8].forEach((i) => {
+      const p = hand[i];
       ctx.fillStyle = "blue";
       ctx.beginPath();
-      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.arc(p.x * canvas.width, p.y * canvas.height, 12, 0, Math.PI * 2);
       ctx.fill();
     });
   }
@@ -61,9 +61,8 @@ function drawPoints(hand, type) {
 // ======== DETECTION LOOP ========
 async function detect() {
   const now = performance.now();
-  const delta = now - lastFrameTime;
+  fpsBox.textContent = `FPS: ${(1000 / (now - lastFrameTime)).toFixed(1)}`;
   lastFrameTime = now;
-  fpsBox.textContent = `FPS: ${(1000 / delta).toFixed(1)}`;
 
   if (!handLandmarker) {
     requestAnimationFrame(detect);
@@ -75,15 +74,18 @@ async function detect() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  if (results?.handLandmarks && results?.handedness) {
+  if (results.handLandmarks.length > 0) {
     for (let i = 0; i < results.handLandmarks.length; i++) {
       const hand = results.handLandmarks[i];
-      const handedness = results.handedness[i].label; // "Left" ou "Right"
+
+      // 🔥 Forma correta na versão atual do Mediapipe
+      const handedness = results.handedness[i][0].categoryName; // "Left" ou "Right"
 
       if (handedness === "Left") {
         drawPoints(hand, "rotation");
         updateCubeRotation(hand);
-      } else if (handedness === "Right") {
+      } 
+      else if (handedness === "Right") {
         drawPoints(hand, "zoom");
         updateCubeZoom(hand);
       }
