@@ -29,7 +29,7 @@ async function loadModel() {
   );
 
   handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: { modelAssetPath: "/models/hand_landmarker.task" },
+    baseOptions: { modelAssetPath: "models/hand_landmarker.task" },
     runningMode: "VIDEO",
     numHands: 2
   });
