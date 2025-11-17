@@ -65,15 +65,21 @@ async function detect() {
   lastFrameTime = now;
   fpsBox.textContent = `FPS: ${(1000 / delta).toFixed(1)}`;
 
-  const results = handLandmarker.detectForVideo(video, now);
+  if (!handLandmarker) {
+    requestAnimationFrame(detect);
+    return;
+  }
+
+  const results = await handLandmarker.detectForVideo(video, now);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa canvas
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  if (results && results.landmarks && results.landmarks.length > 0) {
-    for (let i = 0; i < results.landmarks.length; i++) {
-      const hand = results.landmarks[i];
-      const handedness = results.handedness[i].label; // Left ou Right
+  if (results && results.handedness && results.handLandmarks) {
+    for (let i = 0; i < results.handLandmarks.length; i++) {
+      const hand = results.handLandmarks[i];
+      const handedness = results.handedness[i].label; // "Left" ou "Right"
 
-      // Definir qual mão é movimento e qual é zoom
       if (handedness === "Left") {
         drawPoints(hand, "movement");
         updateCubeRotation(hand);
