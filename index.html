@@ -37,7 +37,10 @@
 <canvas id="canvas"></canvas>
 
 <script type="module">
-import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
+import {
+  FilesetResolver,
+  HandLandmarker
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
@@ -47,11 +50,12 @@ const fpsBox = document.getElementById("fps");
 let lastFrameTime = performance.now();
 let handLandmarker;
 
+// Start camera
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
 
-  return new Promise((res) => {
+  return new Promise(res => {
     video.onloadedmetadata = () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -60,24 +64,22 @@ async function startCamera() {
   });
 }
 
+// Load model
 async function loadModel() {
-  const visionApp = await vision.FilesetResolver.forVisionTasks(
+  const vision = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
   );
 
-  handLandmarker = await vision.HandLandmarker.createFromOptions(
-    visionApp,
-    {
-      baseOptions: {
-        // MODELO LOCAL — FUNCIONA NA VERCEL
-        modelAssetPath: "/models/hand_landmarker.task"
-      },
-      runningMode: "VIDEO",
-      numHands: 1
-    }
-  );
+  handLandmarker = await HandLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: "/models/hand_landmarker.task"
+    },
+    runningMode: "VIDEO",
+    numHands: 1
+  });
 }
 
+// Draw hand connections
 function drawConnections(points) {
   const fingers = [
     [0, 1, 2, 3, 4],
@@ -103,6 +105,7 @@ function drawConnections(points) {
   }
 }
 
+// Draw landmark points
 function drawPoints(points) {
   for (const point of points) {
     const x = point.x * canvas.width;
@@ -114,6 +117,7 @@ function drawPoints(points) {
   }
 }
 
+// Detection loop
 async function detect() {
   const now = performance.now();
   const delta = now - lastFrameTime;
@@ -134,7 +138,7 @@ async function detect() {
   requestAnimationFrame(detect);
 }
 
-// Start
+// Start system
 await startCamera();
 await loadModel();
 detect();
