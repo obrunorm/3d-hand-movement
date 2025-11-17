@@ -65,6 +65,7 @@ async function startCamera() {
 }
 
 async function loadModel() {
+
   const vision = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
   );
@@ -72,8 +73,9 @@ async function loadModel() {
   handLandmarker = await HandLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath:
-        "/models/hand_landmarker.task"
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/models/hand_landmarker.task"
     },
+    runningMode: "VIDEO",
     numHands: 1
   });
 }
@@ -119,12 +121,12 @@ function detect() {
   ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
   ctx.restore();
 
-  const result = handLandmarker.detectForVideo(video, now);
+  const timestamp = performance.now();
+  const result = handLandmarker.detectForVideo(video, timestamp);
 
   if (result.landmarks && result.landmarks.length > 0) {
-    const hand = result.landmarks[0];
-    drawPoints(hand);
-    drawConnections(hand);
+    drawPoints(result.landmarks[0]);
+    drawConnections(result.landmarks[0]);
   }
 
   requestAnimationFrame(detect);
