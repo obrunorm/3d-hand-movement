@@ -48,16 +48,19 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ======== FUNÇÃO PARA ATUALIZAR O CUBO ========
-export function updateCubeWithHand(hand) {
-  // Rotação baseada na posição da mão
-  const x = hand[1].x;
-  const y = hand[1].y;
+// ======== FUNÇÕES PARA CADA MÃO ========
+
+// Rotacionar cubo com a mão de movimento
+export function updateCubeRotation(hand) {
+  const x = hand[8].x; // indicador
+  const y = hand[8].y;
   cube.rotation.y = (x - 0.5) * Math.PI * 2;
   cube.rotation.x = (y - 0.5) * Math.PI;
+}
 
-  // Zoom baseado na distância entre polegar (4) e indicador (8)
-  const dx = hand[4].x - hand[8].x;
+// Zoom com a mão de distância
+export function updateCubeZoom(hand) {
+  const dx = hand[4].x - hand[8].x; // polegar e indicador
   const dy = hand[4].y - hand[8].y;
   const distance = Math.sqrt(dx*dx + dy*dy);
   camera.position.z = 2 + distance * 5;
