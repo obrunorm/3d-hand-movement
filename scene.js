@@ -1,6 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
 
-// ======== SCENE SETUP ========
+// ===== SCENE SETUP =====
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   70,
@@ -13,7 +13,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// ======== CUBE ========
+// ===== CUBE =====
 const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
 const material = new THREE.MeshPhysicalMaterial({
   color: 0xffffff,
@@ -26,7 +26,7 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.x = 1.5;
 scene.add(cube);
 
-// ======== LIGHT ========
+// ===== LIGHT =====
 const light = new THREE.PointLight(0xffffff, 2);
 light.position.set(4, 4, 4);
 scene.add(light);
@@ -34,23 +34,23 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 camera.position.z = 4;
 
-// ======== ANIMATION LOOP ========
+// ===== ANIMATION LOOP =====
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 animate();
 
-// ======== RESIZE ========
+// ===== RESIZE =====
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ======== UPDATE FUNCTIONS ========
+// ===== UPDATE FUNCTIONS =====
 export function updateCubeRotation(hand) {
-  // Rotação baseada na posição do indicador (tip 8)
+  if (!hand || hand.length < 9) return;
   const x = hand[8].x;
   const y = hand[8].y;
   cube.rotation.y = (x - 0.5) * Math.PI * 2;
@@ -58,7 +58,7 @@ export function updateCubeRotation(hand) {
 }
 
 export function updateCubeZoom(hand) {
-  // Zoom baseado na distância polegar (4) e indicador (8)
+  if (!hand || hand.length < 9) return;
   const dx = hand[4].x - hand[8].x;
   const dy = hand[4].y - hand[8].y;
   const distance = Math.sqrt(dx * dx + dy * dy);
