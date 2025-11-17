@@ -36,44 +36,22 @@ async function loadModel() {
       modelAssetPath: "/models/hand_landmarker.task"
     },
     runningMode: "VIDEO",
-    numHands: 2 // detect two hands
+    numHands: 2
   });
 }
 
-// Draw hand connections
-function drawConnections(points) {
-  const fingers = [
-    [0, 1, 2, 3, 4],
-    [0, 5, 6, 7, 8],
-    [0, 9, 10, 11, 12],
-    [0, 13, 14, 15, 16],
-    [0, 17, 18, 19, 20],
-  ];
-
-  ctx.strokeStyle = "lime";
-  ctx.lineWidth = 2;
-
-  for (const finger of fingers) {
-    ctx.beginPath();
-    const first = points[finger[0]];
-    ctx.moveTo(first.x * canvas.width, first.y * canvas.height);
-
-    for (let i = 1; i < finger.length; i++) {
-      const p = points[finger[i]];
-      ctx.lineTo(p.x * canvas.width, p.y * canvas.height);
-    }
-    ctx.stroke();
-  }
-}
-
-// Draw landmark points
+// Draw ONLY thumb tip (4) and index tip (8)
 function drawPoints(points) {
-  for (const point of points) {
+  const tipIndices = [4, 8]; // Thumb tip & Index tip
+
+  for (const index of tipIndices) {
+    const point = points[index];
     const x = point.x * canvas.width;
     const y = point.y * canvas.height;
-    ctx.fillStyle = "lime";
+
+    ctx.fillStyle = "red";
     ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.arc(x, y, 10, 0, Math.PI * 2); // bigger point
     ctx.fill();
   }
 }
@@ -93,7 +71,6 @@ async function detect() {
   if (results && results.landmarks && results.landmarks.length > 0) {
     for (const hand of results.landmarks) {
       drawPoints(hand);
-      drawConnections(hand);
     }
   }
 
