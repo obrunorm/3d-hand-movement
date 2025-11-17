@@ -38,8 +38,7 @@ async function loadModel() {
 // ======== DRAW POINTS ========
 function drawPoints(hand, type) {
   if (type === "movement") {
-    // desenha apenas indicador (tip 8)
-    const point = hand[8];
+    const point = hand[8]; // indicador
     const x = point.x * canvas.width;
     const y = point.y * canvas.height;
     ctx.fillStyle = "red";
@@ -47,7 +46,6 @@ function drawPoints(hand, type) {
     ctx.arc(x, y, 10, 0, Math.PI * 2);
     ctx.fill();
   } else if (type === "zoom") {
-    // desenha polegar (4) e indicador (8)
     [4, 8].forEach(index => {
       const point = hand[index];
       const x = point.x * canvas.width;
@@ -73,9 +71,9 @@ async function detect() {
   if (results && results.landmarks && results.landmarks.length > 0) {
     for (let i = 0; i < results.landmarks.length; i++) {
       const hand = results.landmarks[i];
-      const handedness = results.handedness[i].label; // "Left" ou "Right"
+      const handedness = results.handedness[i].label; // Left ou Right
 
-      // Escolha qual mão é movimento e qual é zoom
+      // Definir qual mão é movimento e qual é zoom
       if (handedness === "Left") {
         drawPoints(hand, "movement");
         updateCubeRotation(hand);
@@ -91,3 +89,5 @@ async function detect() {
 
 // ======== START SYSTEM ========
 await startCamera();
+await loadModel();
+detect();
