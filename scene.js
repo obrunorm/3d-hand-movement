@@ -61,6 +61,6 @@ export function updateCubeZoom(hand) {
   // Zoom baseado na distância polegar (4) e indicador (8)
   const dx = hand[4].x - hand[8].x;
   const dy = hand[4].y - hand[8].y;
-  const distance = Math.sqrt(dx*dx + dy*dy);
+  const distance = Math.sqrt(dx * dx + dy * dy);
   camera.position.z = 2 + distance * 5;
 }

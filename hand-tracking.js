@@ -72,10 +72,11 @@ async function detect() {
 
   const results = await handLandmarker.detectForVideo(video, now);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa canvas
+  // limpa canvas e desenha vídeo
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  if (results && results.handedness && results.handLandmarks) {
+  if (results?.handLandmarks && results?.handedness) {
     for (let i = 0; i < results.handLandmarks.length; i++) {
       const hand = results.handLandmarks[i];
       const handedness = results.handedness[i].label; // "Left" ou "Right"
