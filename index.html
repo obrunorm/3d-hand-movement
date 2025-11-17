@@ -72,7 +72,7 @@ async function loadModel() {
   handLandmarker = await HandLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath:
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/models/hand_landmarker.task"
+        "/models/hand_landmarker.task"
     },
     numHands: 1
   });
