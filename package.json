@@ -1,0 +1,28 @@
+{
+  "name": "hands_move_3d",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hand-tracking.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/obrunorm/3d-hand-movement.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/obrunorm/3d-hand-movement/issues"
+  },
+  "homepage": "https://github.com/obrunorm/3d-hand-movement#readme",
+  "dependencies": {
+    "three": "^0.181.1"
+  },
+  "devDependencies": {
+    "vite": "^7.2.2"
+  }
+}

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hand Tracking + Three.js</title>
   <style>
     body { margin: 0; overflow: hidden; background: #000; }
@@ -15,7 +15,8 @@
   <video id="video" autoplay playsinline style="display:none"></video>
   <canvas id="canvas"></canvas>
 
-  <!-- Apenas o script principal -->
+  <!-- IMPORTAR OS DOIS COMO MÓDULO -->
+  <script type="module" src="./scene.js"></script>
   <script type="module" src="./hand-tracking.js"></script>
 </body>
 </html>

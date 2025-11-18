@@ -1,4 +1,8 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+// ======== VARIÁVEL GLOBAL PARA O MODELO ========
+let model = null;
 
 // ======== SCENE SETUP ========
 const scene = new THREE.Scene();
@@ -13,20 +17,32 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// ======== CUBE ========
-const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-const material = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff,
-  roughness: 0.1,
-  metalness: 0.8,
-  clearcoat: 1.0,
-  clearcoatRoughness: 0.05
-});
-const cube = new THREE.Mesh(geometry, material);
-cube.position.x = 1.5;
-scene.add(cube);
+// ======== GLTF MODEL LOADING ========
+const loader = new GLTFLoader();
+loader.load(
+  "heart/heart.glb",
+  function (gltf) {
+    model = gltf.scene;
 
-// ======== LIGHT ========
+    model.scale.set(15, 15, 15);
+    model.position.set(1.5, -1.0, 0);
+
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    scene.add(model);
+  },
+  undefined,
+  function (error) {
+    console.error("Erro ao carregar GLTF:", error);
+  }
+);
+
+// ======== LIGHTS ========
 const light = new THREE.PointLight(0xffffff, 2);
 light.position.set(4, 4, 4);
 scene.add(light);
@@ -41,27 +57,33 @@ function animate() {
 }
 animate();
 
-// ======== RESIZE ========
+// ======== WINDOW RESIZE ========
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ======== FUNÇÕES PARA CADA MÃO ========
+// ======== HAND CONTROL FUNCTIONS ========
 
-// Rotacionar cubo com a mão de movimento (esquerda)
-export function updateCubeRotation(hand) {
+// Rotacionar o modelo com a mão de movimento (esquerda)
+export function updateModelRotation(hand) {
+  if (!model) return;
+
   const x = hand[8].x; // indicador
   const y = hand[8].y;
-  cube.rotation.y = (x - 0.5) * Math.PI * 2;
-  cube.rotation.x = (y - 0.5) * Math.PI;
+
+  model.rotation.y = (x - 0.5) * Math.PI * 2;
+  model.rotation.x = (y - 0.5) * Math.PI;
 }
 
-// Zoom com a mão de distância (direita) — invertido
-export function updateCubeZoom(hand) {
+// Zoom com a mão de distância (direita)
+export function updateModelZoom(hand) {
+  if (!model) return;
+
   const dx = hand[4].x - hand[8].x; // polegar e indicador
   const dy = hand[4].y - hand[8].y;
-  const distance = Math.sqrt(dx*dx + dy*dy);
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
   camera.position.z = 2 - distance * 5; // invertido: afastar aproxima
 }
