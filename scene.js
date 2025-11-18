@@ -1,5 +1,6 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from './libs/three/three.module.js';
+import { GLTFLoader } from './libs/three/GLTFLoader.js';
+
 
 // ======== VARIÁVEL GLOBAL PARA O MODELO ========
 let model = null;
